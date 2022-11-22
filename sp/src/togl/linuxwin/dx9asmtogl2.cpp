@@ -34,7 +34,7 @@
 #include "tier1/utlbuffer.h"
 #include "dx9asmtogl2.h"
 
-#include "materialsystem/ishader.h"
+#include "materialsystem/IShader.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
@@ -106,7 +106,7 @@ void PrintToBuf( CUtlBuffer &buf, const char *pFormat, ... )
 {
 	va_list marker;
 	va_start( marker, pFormat );
-	
+
 	char szTemp[1024];
 	V_vsnprintf( szTemp, sizeof( szTemp ), pFormat, marker );
 	va_end( marker );
@@ -119,7 +119,7 @@ void PrintToBuf( char *pOut, int nOutSize, const char *pFormat, ... )
 	int nStrlen = V_strlen( pOut );
 	pOut += nStrlen;
 	nOutSize -= nStrlen;
-	
+
 	va_list marker;
 	va_start( marker, pFormat );
 	V_vsnprintf( pOut, nOutSize, pFormat, marker );
@@ -171,12 +171,12 @@ int GetNumSwizzleComponents( const char *pParam )
 
 	// Special scalar output which won't accept a swizzle
 	if ( !V_stricmp( pParam, "gl_FragDepth" ) )
-		return 1;	
-	
+		return 1;
+
 	// Special scalar output which won't accept a swizzle
 	if ( !V_stricmp( pParam, "a0" ) )
 		return 1;
-	
+
 	const char *pDot = GetSwizzleDot( pParam );
 	if ( pDot )
 	{
@@ -281,17 +281,17 @@ void WriteParamWithSingleMaskEntry( const char *pParam, int n, char *pOut, int n
 	{
 		V_strcpy( pOut, "-abs(" );
 		bCloseParen = true;
-		
+
 		pOut += 5; nOutLen -= 5;
 	}
 	else if ( !V_strncmp( pParam, "abs(", 4 ) )
 	{
 		V_strcpy( pOut, "abs(" );
 		bCloseParen = true;
-		
+
 		pOut += 4; nOutLen -= 4;
 	}
-	
+
 	GetParamNameWithoutSwizzle( pParam, pOut, nOutLen );
 	PrintToBuf( pOut, nOutLen, "." );
 	PrintToBuf( pOut, nOutLen, "%c", GetSwizzleComponent( pParam, n ) );
@@ -376,14 +376,14 @@ CUtlString EnsureNumSwizzleComponents( const char *pSrcRegisterName, int nCompon
 		V_snprintf( szReg, sizeof( szReg ), "%sabs(%s)", bAbsNegative ? "-" : "", szTemp ) ;
 	}
 
-	return szReg;	
+	return szReg;
 }
 
 static void TranslationError()
 {
 	Plat_DebugString( "D3DToGL: GLSL translation error!\n" );
 	DebuggerBreakIfDebugging();
-	
+
 	Error( "D3DToGL: GLSL translation error!\n" );
 }
 
@@ -426,12 +426,12 @@ bool D3DToGL::OpenIntrinsic( uint32 inst, char* buff, int nBufLen, uint32 destDi
 	// Some GLSL intrinsics need type conversion, which we do in this routine
 	// As a result, the caller must sometimes close both parentheses, not just one
 	bool bDoubleClose = false;
-	
+
 	if ( nArgumentDimension == 0 )
 	{
 		nArgumentDimension = 4;
 	}
-	
+
 	switch ( inst )
 	{
 		case D3DSIO_RSQ:
@@ -479,7 +479,7 @@ bool D3DToGL::OpenIntrinsic( uint32 inst, char* buff, int nBufLen, uint32 destDi
 				Assert( nArgumentDimension > 1 );
 				V_snprintf( buff, nBufLen, "vec%d( greaterThanEqual( ", nArgumentDimension );
 				bDoubleClose = true;
-			}					
+			}
 			break;
 		case D3DSIO_EXP:
 			V_snprintf( buff, nBufLen, "exp( " );  // exp2 ?
@@ -627,7 +627,7 @@ bool D3DToGL::OpenIntrinsic( uint32 inst, char* buff, int nBufLen, uint32 destDi
 			TranslationError();
 			break;
 	}
-	
+
 	return bDoubleClose;
 }
 
@@ -640,7 +640,7 @@ const char* D3DToGL::GetGLSLOperatorString( uint32 inst )
 		return "-";
 	else if ( inst == D3DSIO_MUL )
 		return "*";
-	
+
 	Error( "GetGLSLOperatorString: unknown operator" );
 	return "zzzz";
 }
@@ -877,7 +877,7 @@ void D3DToGL::PrintUsageAndIndexToString( uint32 dwToken, char* strUsageUsageInd
 				// .z  = depth
 				V_snprintf( strUsageUsageIndexName, nBufLen, "gl_FragCoord" );
 			}
-			
+
 			break;
 		case D3DDECLUSAGE_BLENDWEIGHT:
 			V_snprintf( strUsageUsageIndexName, nBufLen, "vertex.attrib[1]" );	// "vertex.attrib[12]" );			// or [1]
@@ -896,10 +896,10 @@ void D3DToGL::PrintUsageAndIndexToString( uint32 dwToken, char* strUsageUsageInd
 			V_snprintf( strUsageUsageIndexName, nBufLen, "oT%d", dwUsageIndex );
 			break;
 		case D3DDECLUSAGE_TANGENT:
-			
+
 			NoteTangentInputUsed();
 			V_strncpy( strUsageUsageIndexName, g_pTangentAttributeName, nBufLen );
-			
+
 			break;
 		case D3DDECLUSAGE_BINORMAL:
 			V_snprintf( strUsageUsageIndexName, nBufLen, "vertex.attrib[14]" );			// aka texc[6]
@@ -913,13 +913,13 @@ void D3DToGL::PrintUsageAndIndexToString( uint32 dwToken, char* strUsageUsageInd
 //			V_snprintf( strUsageUsageIndexName, nBufLen, "_positiont" );				// no analog
 //			break;
 		case D3DDECLUSAGE_COLOR:
-			
+
 			Assert( dwUsageIndex <= 1 );
 //			if ( fSemanticFlags & SEMANTIC_OUTPUT )
 //				V_snprintf( strUsageUsageIndexName, nBufLen, dwUsageIndex != 0 ? "gl_BackColor" : "gl_FrontColor" );
 //			else
 			V_snprintf( strUsageUsageIndexName, nBufLen, dwUsageIndex != 0 ? "gl_SecondaryColor" : "gl_Color" );
-			
+
 			break;
 		case D3DDECLUSAGE_FOG:
 			TranslationError();
@@ -1028,7 +1028,7 @@ CUtlString D3DToGL::FixGLSLSwizzle( const char *pDestRegisterName, const char *p
 		V_strncpy( szSrcRegister, pOpenParen+1, nRegNameLength + 1 ); // Kind of a weird function...copy more than you need and slam the last char to NULL-terminate
 
 	}
-	
+
 	int nSwizzlesInDest = GetNumSwizzleComponents( pDestRegisterName );
 	if ( nSwizzlesInDest == 0 )
 		nSwizzlesInDest = 4;
@@ -1092,7 +1092,7 @@ void D3DToGL::FlagIndirectRegister( uint32 dwToken, int *pARLDestReg )
 // PrintParameterToString()
 //
 // Helper function which prints ASCII representation of passed Parameter dwToken
-// to string. Token defines parameter details. The dwSourceOrDest parameter says 
+// to string. Token defines parameter details. The dwSourceOrDest parameter says
 // whether or not this is a source or destination register
 //------------------------------------------------------------------------------
 void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, char *pRegisterName, int nBufLen, bool bForceScalarSource, int *pARLDestReg )
@@ -1119,7 +1119,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 		{
 //			strcat_s( pRegisterName, nBufLen, "_pp" );
 		}
-				
+
 		if ( dwToken & D3DSPDM_MSAMPCENTROID)
 		{
 //			strcat_s( pRegisterName, nBufLen, "_centroid" );
@@ -1153,11 +1153,11 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 					break;
 				case D3DSPSM_ABS:							 // abs()
 					strcat_s( pRegisterName, nBufLen, "abs(" );
-					
+
 					break;
 				case D3DSPSM_ABSNEG:						 // -abs()
 					strcat_s( pRegisterName, nBufLen, "-abs(" );
-					
+
 					break;
 				case D3DSPSM_NOT:							 // for predicate register: "!p0"
 					TranslationError();
@@ -1186,9 +1186,9 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 				{
 					V_snprintf( buff, sizeof( buff ), dwRegNum == 0 ? "gl_Color" : "gl_SecondaryColor" );
 				}
-				strcat_s( pRegisterName, nBufLen, buff );				
+				strcat_s( pRegisterName, nBufLen, buff );
 			}
-			else 
+			else
 			{
 				V_snprintf( buff, sizeof( buff ), "v%d", dwRegNum );
 				strcat_s( pRegisterName, nBufLen, buff );
@@ -1223,7 +1223,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 					TranslationError();
 					V_snprintf( szConstantRegName, 3, "pc" );
 				}
-								
+
 				if ( ( m_bGenerateBoneUniformBuffer ) && ( dwRegNum >= DXABSTRACT_VS_FIRST_BONE_SLOT ) )
 				{
 					if( dwRegNum < DXABSTRACT_VS_LAST_BONE_SLOT )
@@ -1247,7 +1247,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 				// Index into single pc/vc[] register array with relative addressing
 				int nDstReg = -1;
 				FlagIndirectRegister( GetNextToken(), &nDstReg );
-				if ( pARLDestReg ) 
+				if ( pARLDestReg )
 					*pARLDestReg = nDstReg;
 
 				Assert( nDstReg != ARL_DEST_NONE );
@@ -1259,9 +1259,9 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 				else if ( nDstReg == ARL_DEST_W )
 					nSrcSwizzle = 'w';
 				V_snprintf( buff, sizeof( buff ), "%s[int(va_r.%c) + %d]", szConstantRegName, nSrcSwizzle, dwRegNum );
-								
+
 				strcat_s( pRegisterName, nBufLen, buff );
-				
+
 				// Must allow swizzling, otherwise this example doesn't compile right: mad r3.xyz, c27[a0.w].w, r3, r7
 				//bAllowSwizzle = false;
 			}
@@ -1281,17 +1281,17 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 					}
 					else
 					{
-						// handles case where constants after the bones are used (c217 onwards), these are to be concatenated with those before the bones (c0-c57) 
+						// handles case where constants after the bones are used (c217 onwards), these are to be concatenated with those before the bones (c0-c57)
 						// keep track of regnum for concatenated array
 						dwRegNum -= ( DXABSTRACT_VS_LAST_BONE_SLOT + 1 ) - DXABSTRACT_VS_FIRST_BONE_SLOT;
-						m_nHighestRegister = MAX( m_nHighestRegister, dwRegNum );	
+						m_nHighestRegister = MAX( m_nHighestRegister, dwRegNum );
 					}
 				}
 				else
 				{
 					//// NOGO if (dwRegNum != 255)	// have seen cases where dwRegNum is 0xFF... need to figure out where those opcodes are coming from
 					{
-						m_nHighestRegister = MAX( m_nHighestRegister, dwRegNum );	
+						m_nHighestRegister = MAX( m_nHighestRegister, dwRegNum );
 					}
 
 					Assert( m_nHighestRegister < DXABSTRACT_VS_PARAM_SLOTS );
@@ -1323,7 +1323,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 					{
 						V_snprintf( buff, sizeof( buff ), "varying vec4 oT%d", dwRegNum );
 					}
-					
+
 					bAllowWriteMask = false;
 				}
 				else // source register
@@ -1342,14 +1342,14 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 					strcat_s( pRegisterName, nBufLen, "vTempPos" ); // In GLSL, this ends up in gl_Position later on
 					m_bDeclareVSOPos = true;
 				break;
-				
+
 				case D3DSRO_FOG:
 					strcat_s( pRegisterName, nBufLen, "gl_FogFragCoord" );
 					m_bDeclareVSOFog = true;
 				break;
 
 				default:
-					printf( "\nD3DSPR_RASTOUT: dwRegNum is %08x and token is %08x", dwRegNum, dwToken );  
+					printf( "\nD3DSPR_RASTOUT: dwRegNum is %08x and token is %08x", dwRegNum, dwToken );
 					TranslationError();
 				break;
 			}
@@ -1370,7 +1370,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 			{
 				Error( "Invalid D3DSPR_ATTROUT index" );
 			}
-			
+
 			strcat_s( pRegisterName, nBufLen, buff );
 			break;
 		case D3DSPR_TEXCRDOUT: // aliases to D3DSPR_OUTPUT
@@ -1388,7 +1388,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 				{
 					V_snprintf( buff, sizeof( buff ), "oT%d", dwRegNum );
 				}
-				
+
 				m_dwTexCoordOutMask |= ( 0x00000001 << dwRegNum );
 			}
 			else
@@ -1598,7 +1598,7 @@ void D3DToGL::PrintParameterToString ( uint32 dwToken, uint32 dwSourceOrDest, ch
 
 					}
 
-				} // end !bForceScalarSource 
+				} // end !bForceScalarSource
 			}
 			else // dwSwizzle == D3DVS_NOSWIZZLE
 			{
@@ -1744,7 +1744,7 @@ void D3DToGL::Handle_DCL()
 
 	uint32 dwUsage = ( dwToken & D3DSP_DCL_USAGE_MASK );
 	uint32 dwUsageIndex = ( dwToken & D3DSP_DCL_USAGEINDEX_MASK ) >> D3DSP_DCL_USAGEINDEX_SHIFT;
-		
+
 	uint32 dwRegNum = dwRegToken & D3DSP_REGNUM_MASK;
 	uint32 nRegType = GetRegTypeFromToken( dwRegToken );
 
@@ -1756,7 +1756,7 @@ void D3DToGL::Handle_DCL()
 		if ( ( m_dwMajorVersion >= 3 ) && ( nRegType == D3DSPR_OUTPUT ) )
 		{
 //				uint32 dwRegComponents = ( dwRegToken & D3DSP_WRITEMASK_ALL ) >> 16; // Components used by the output register (1 means float, 3 means vec2, 7 means vec3, f means vec4)
-				
+
 			if ( dwRegNum >= MAX_DECLARED_OUTPUTS )
 				Error( "Output register number (%d) too high (only %d supported).", dwRegNum, MAX_DECLARED_OUTPUTS );
 
@@ -1846,7 +1846,7 @@ void D3DToGL::Handle_DCL()
 					m_dwSamplerTypes[nRegNum] = SAMPLER_TYPE_3D;
 					break;
 			}
-			
+
 			// Track sampler declarations
 			m_dwSamplerUsageMask |= 1 << nRegNum;
 		}
@@ -1857,7 +1857,7 @@ void D3DToGL::Handle_DCL()
 			{
 				Assert( m_DeclaredInputs[dwRegNum] == UNDECLARED_INPUT );
 				m_DeclaredInputs[dwRegNum] = dwToken;
-								
+
 				if ( ( dwUsage != D3DDECLUSAGE_COLOR ) && ( dwUsage != D3DDECLUSAGE_TEXCOORD ) )
 				{
 					TranslationError(); // Not supported yet, but can be if we need it.
@@ -1998,7 +1998,7 @@ struct HighPrec
 			Assert( m_data[j] == 0 );
 		}
 #endif
-		
+
 		int nNewLowestNonZeroIndex = ARRAYSIZE(m_data);
 		for (int i = m_nLowestNonZeroIndex; i < ARRAYSIZE(m_data); ++i)
 		{
@@ -2019,7 +2019,7 @@ struct HighPrec
 	// The individual 'digits' (32-bit unsigned integers actually) that
 	// make up the number. The most-significant digit is in m_data[0].
 	T m_data[count];
-	
+
 	uint m_nLowestNonZeroIndex;
 };
 
@@ -2091,10 +2091,10 @@ static uint PrintDoubleInt( char *pBuf, uint nBufSize, double f, uint nMinChars 
 
 		if ( bAnyDigitsLeft )
 		{
-			uint n = remainder % 100U; remainder /= 100U; *reinterpret_cast<uint16*>(pDst - 1) = reinterpret_cast<const uint16*>(pDigits)[n]; 
-			n = remainder % 100U; remainder /= 100U; *reinterpret_cast<uint16*>(pDst - 1 - 2) = reinterpret_cast<const uint16*>(pDigits)[n]; 
+			uint n = remainder % 100U; remainder /= 100U; *reinterpret_cast<uint16*>(pDst - 1) = reinterpret_cast<const uint16*>(pDigits)[n];
+			n = remainder % 100U; remainder /= 100U; *reinterpret_cast<uint16*>(pDst - 1 - 2) = reinterpret_cast<const uint16*>(pDigits)[n];
 			Assert( remainder < 100U );
-			*reinterpret_cast<uint16*>(pDst - 1 - 4) = reinterpret_cast<const uint16*>(pDigits)[remainder]; 
+			*reinterpret_cast<uint16*>(pDst - 1 - 4) = reinterpret_cast<const uint16*>(pDigits)[remainder];
 			pDst -= 6;
 		}
 		else
@@ -2115,23 +2115,23 @@ static uint PrintDoubleInt( char *pBuf, uint nBufSize, double f, uint nMinChars 
 	} while ( bAnyDigitsLeft );
 
 	uint l = pLastChar - pDst;
-	
+
 	while ( ( l - 1 ) < nMinChars )
 	{
 		*pDst-- = '0';
 		l++;
 	}
-	
+
 	Assert( (int)l == ( pLastChar - pDst ) );
 
 	Assert( l <= nBufSize );
-			
+
 	memmove( pBuf, pDst + 1, l );
 	return l - 1;
 }
 
 // FloatToString is equivalent to sprintf( "%.12f" ), but doesn't have any dependencies on the current locale setting.
-// Unfortunately, high accuracy radix conversion is actually pretty tricky to do right. 
+// Unfortunately, high accuracy radix conversion is actually pretty tricky to do right.
 // Most importantly, this function has the same max roundtrip (IEEE->ASCII->IEEE) error as the MS CRT functions and can reliably handle extremely large inputs.
 static void FloatToString( char *pBuf, uint nBufSize, double fConst )
 {
@@ -2175,7 +2175,7 @@ static void FloatToString( char *pBuf, uint nBufSize, double fConst )
 	{
 		uint l = PrintDoubleInt( pDst, pEnd - pDst, flFract, 12 );
 		pDst += l;
-					
+
 		StripExtraTrailingZeros( pBuf );	// Turn 1.00000 into 1.0
 	}
 }
@@ -2193,7 +2193,7 @@ static void TestFloatConversion()
 			fConst = RandomFloat( -1e-30, 1e+30 ); break;
 		case 1:
 			fConst = RandomFloat( -1e-10, 1e+10 ); break;
-		case 2: 
+		case 2:
 			fConst = RandomFloat( -1e-5, 1e+5 ); break;
 		default:
 			fConst = RandomFloat( -1, 1 ); break;
@@ -2349,14 +2349,14 @@ void D3DToGL::Handle_MAD( uint32 nInstruction )
 	sParam3 = FixGLSLSwizzle( sParam1, sParam3 );
 	sParam4 = FixGLSLSwizzle( sParam1, sParam4 );
 	PrintToBufWithIndents( *m_pBufALUCode, "%s = %s * %s + %s;\n", sParam1.String(), sParam2.String(), sParam3.String(), sParam4.String() );
-		
+
 	// If the _SAT instruction modifier is used, then do a saturate here.
 	if ( nDestToken & D3DSPDM_SATURATE )
 	{
 		int nComponents = GetNumSwizzleComponents( sParam1.String() );
 		if ( nComponents == 0 )
 			nComponents = 4;
-			
+
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = clamp( %s, %s, %s );\n", sParam1.String(), sParam1.String(), g_szVecZeros[nComponents], g_szVecOnes[nComponents] );
 	}
 }
@@ -2380,14 +2380,14 @@ void D3DToGL::Handle_DP2ADD()
 	CUtlString sArg1 = EnsureNumSwizzleComponents( pSrc1Reg, 2 );
 
 	PrintToBufWithIndents( *m_pBufALUCode, "%s = dot( %s, %s ) + %s;\n", pDestReg, sArg0.String(), sArg1.String(), pSrc2Reg );
-		
+
 	// If the _SAT instruction modifier is used, then do a saturate here.
 	if ( nDestToken & D3DSPDM_SATURATE )
 	{
 		int nComponents = GetNumSwizzleComponents( pDestReg );
 		if ( nComponents == 0 )
 			nComponents = 4;
-			
+
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = clamp( %s, %s, %s );\n", pDestReg, pDestReg, g_szVecZeros[nComponents], g_szVecOnes[nComponents] );
 	}
 }
@@ -2400,26 +2400,26 @@ void D3DToGL::Handle_SINCOS()
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc0Reg, sizeof( pSrc0Reg ), true, NULL );
 	m_bNeedsSinCosDeclarations = true;
 
-	
+
 	CUtlString sDest( pDestReg );
 	CUtlString sArg0 = EnsureNumSwizzleComponents( pSrc0Reg, 1 );// Ensure input is scalar
 	CUtlString sResult( "vSinCosTmp.xy" );			// Always going to populate this
 	sResult = FixGLSLSwizzle( sDest, sResult );		// Make sure we match the desired output reg
-			
+
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.z = %s * %s;\n", sArg0.String(), sArg0.String() );
-		
+
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.xy = vSinCosTmp.zz * scA.xy + scA.wz;\n" );
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.xy = vSinCosTmp.xy * vSinCosTmp.zz + scB.xy;\n" );
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.xy = vSinCosTmp.xy * vSinCosTmp.zz + scB.wz;\n" );
 
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.x = vSinCosTmp.x * %s;\n", sArg0.String() );
-		
+
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.xy = vSinCosTmp.xy * vSinCosTmp.xx;\n" );
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.xy = vSinCosTmp.xy + vSinCosTmp.xy;\n" );
 	PrintToBufWithIndents( *m_pBufALUCode, "vSinCosTmp.x = -vSinCosTmp.x + scB.z;\n" );
-		
+
 	PrintToBufWithIndents( *m_pBufALUCode, "%s = %s;\n", sDest.String(), sResult.String() );
-	
+
 	// Eat two more tokens since D3D defines Taylor series constants that we won't need
 	SkipTokens( 2 );
 }
@@ -2435,10 +2435,10 @@ void D3DToGL::Handle_LRP( uint32 nInstruction )
 	CUtlString sParam1 = GetParameterString( GetNextToken(), SRC_REGISTER, false, &nARLComp1 );
 	int nARLComp2 = ARL_DEST_NONE;
 	CUtlString sParam2 = GetParameterString( GetNextToken(), SRC_REGISTER, false, &nARLComp2 );
-		
+
 	// This optionally inserts a move from our dummy address register to the .x component of the real one
 	InsertMoveFromAddressRegister( m_pBufALUCode, nARLComp0, nARLComp1, nARLComp2 );
-		
+
 	sParam0 = FixGLSLSwizzle( sDest, sParam0 );
 	sParam1 = FixGLSLSwizzle( sDest, sParam1 );
 	sParam2 = FixGLSLSwizzle( sDest, sParam2 );
@@ -2452,7 +2452,7 @@ void D3DToGL::Handle_LRP( uint32 nInstruction )
 		int nComponents = GetNumSwizzleComponents( sDest.String() );
 		if ( nComponents == 0 )
 			nComponents = 4;
-			
+
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = clamp( %s, %s, %s );\n", sDest.String(), sDest.String(), g_szVecZeros[nComponents], g_szVecOnes[nComponents] );
 	}
 }
@@ -2463,16 +2463,16 @@ void D3DToGL::Handle_TEX( uint32 dwToken, bool bIsTexLDL )
 	char pDestReg[64], pSrc0Reg[64], pSrc1Reg[64];
 	PrintParameterToString( GetNextToken(), DST_REGISTER, pDestReg, sizeof( pDestReg ), false, NULL );
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc0Reg, sizeof( pSrc0Reg ), false, NULL );
-	
+
 	DWORD dwSrc1Token = GetNextToken();
 	PrintParameterToString( dwSrc1Token, SRC_REGISTER, pSrc1Reg, sizeof( pSrc1Reg ), false, NULL );
-	
+
 	Assert( (dwSrc1Token & D3DSP_REGNUM_MASK) < ARRAYSIZE( m_dwSamplerTypes ) );
 	uint32 nSamplerType = m_dwSamplerTypes[dwSrc1Token & D3DSP_REGNUM_MASK];
 	if ( nSamplerType == SAMPLER_TYPE_2D )
 	{
 		const bool bIsShadowSampler = ( ( 1 << ( (int) ( dwSrc1Token & D3DSP_REGNUM_MASK ) ) ) & m_nShadowDepthSamplerMask ) != 0;
-			
+
 		if ( bIsTexLDL )
 		{
 			CUtlString sCoordVar = EnsureNumSwizzleComponents( pSrc0Reg, bIsShadowSampler ? 3 : 2 );
@@ -2503,7 +2503,7 @@ void D3DToGL::Handle_TEX( uint32 dwToken, bool bIsTexLDL )
 			CUtlString s4DProjCoords = EnsureNumSwizzleComponents( pSrc0Reg, 4 ); // Ensure vec4 variant
 			PrintToBufWithIndents( *m_pBufALUCode, "%s = texture2DProj( %s, %s );\n", pDestReg, pSrc1Reg, s4DProjCoords.String() );
 		}
-		else				
+		else
 		{
 			CUtlString sCoordVar = EnsureNumSwizzleComponents( pSrc0Reg, bIsShadowSampler ? 3 : 2 );
 			PrintToBufWithIndents( *m_pBufALUCode, "%s = texture2D( %s, %s );\n", pDestReg, pSrc1Reg, sCoordVar.String() );
@@ -2611,11 +2611,11 @@ void D3DToGL::Handle_BREAKC( uint32 dwToken )
 	}
 
 	char src0[256];
-	uint32 src0Token = GetNextToken(); 
+	uint32 src0Token = GetNextToken();
 	PrintParameterToString( src0Token, SRC_REGISTER, src0, sizeof( src0 ), false, NULL );
 
 	char src1[256];
-	uint32 src1Token = GetNextToken(); 
+	uint32 src1Token = GetNextToken();
 	PrintParameterToString( src1Token, SRC_REGISTER, src1, sizeof( src1 ), false, NULL );
 
 	PrintToBufWithIndents( *m_pBufALUCode, "if (%s %s %s) break;\n", src0, pComparison, src1 );
@@ -2666,7 +2666,7 @@ void D3DToGL::HandleBinaryOp_GLSL( uint32 nInstruction )
 	{
 		int nDestComponents = GetNumSwizzleComponents( sParam1.String() );
 		int nSrcComponents = GetNumSwizzleComponents( sParam2.String() );
-		
+
 		// All remaining instructions can use GLSL intrinsics like dot() and cross().
 		bool bDoubleClose = OpenIntrinsic( nInstruction, buff, sizeof( buff ), nDestComponents, nSrcComponents );
 
@@ -2738,7 +2738,7 @@ void D3DToGL::Handle_CMP()
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc0Reg, sizeof( pSrc0Reg ), false, NULL );
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc1Reg, sizeof( pSrc1Reg ), false, NULL );
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc2Reg, sizeof( pSrc2Reg ), false, NULL );
-	
+
 	// These are a tricky case.. we have to expand it out into multiple statements.
 	char szDestBase[256];
 	GetParamNameWithoutSwizzle( pDestReg, szDestBase, sizeof( szDestBase ) );
@@ -2749,7 +2749,7 @@ void D3DToGL::Handle_CMP()
 
 	// This isn't reliable!
 	//if ( DoParamNamesMatch( pDestReg, pSrc0Reg ) && GetNumSwizzleComponents( pDestReg ) > 1  )
-	if ( 1 ) 
+	if ( 1 )
 	{
 		// So the dest register is the same as the comparand. We're in danger of screwing up our results.
 		//
@@ -2775,14 +2775,14 @@ void D3DToGL::Handle_CMP()
 		// Just write out the simple expanded version of the CMP. No need to use atomic_temp_var.
 		WriteGLSLCmp( pDestReg, pSrc0Reg, pSrc1Reg, pSrc2Reg );
 	}
-		
+
 	// If the _SAT instruction modifier is used, then do a saturate here.
 	if ( nDestToken & D3DSPDM_SATURATE )
 	{
 		int nComponents = GetNumSwizzleComponents( pDestReg );
 		if ( nComponents == 0 )
 			nComponents = 4;
-			
+
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = clamp( %s, %s, %s );\n", pDestReg, pDestReg, g_szVecZeros[nComponents], g_szVecOnes[nComponents] );
 	}
 }
@@ -2794,7 +2794,7 @@ void D3DToGL::Handle_NRM()
 	PrintParameterToString( GetNextToken(), DST_REGISTER, pDestReg, sizeof( pDestReg ), false, NULL );
 	int nARLSrcComp = ARL_DEST_NONE;
 	PrintParameterToString( GetNextToken(), SRC_REGISTER, pSrc0Reg, sizeof( pSrc0Reg ), false, &nARLSrcComp );
-	
+
 	if ( nARLSrcComp != -1 )
 	{
 		InsertMoveFromAddressRegister( m_pBufALUCode, nARLSrcComp, -1, -1 );
@@ -2811,7 +2811,7 @@ void D3DToGL::Handle_UnaryOp( uint32 nInstruction )
 	CUtlString sParam2 = GetParameterString( GetNextToken(), SRC_REGISTER, false, NULL );
 	sParam2 = FixGLSLSwizzle( sParam1, sParam2 );
 
-	
+
 	if ( nInstruction == D3DSIO_MOV )
 	{
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = %s;\n", sParam1.String(), sParam2.String() );
@@ -2844,7 +2844,7 @@ void D3DToGL::Handle_UnaryOp( uint32 nInstruction )
 	{
 		m_bDeclareAddressReg = true;
 		PrintToBufWithIndents( *m_pBufALUCode, "%s = %s;\n", sParam1.String(), sParam2.String() );
-			
+
 		if ( !m_bGenerateBoneUniformBuffer )
 		{
 			m_nHighestRegister = DXABSTRACT_VS_PARAM_SLOTS - 1;
@@ -2914,7 +2914,7 @@ void D3DToGL::WriteGLSLOutputVariableAssignments()
 		{
 			PrintToBuf( *m_pBufAttribCode, "\n// Now we're storing the oN variables from the output dcl_ statements back into their GLSL equivalents.\n" );
 		}
-				
+
 		for ( int i=0; i < ARRAYSIZE( m_DeclaredOutputs ); i++ )
 		{
 			if ( m_DeclaredOutputs[i] == UNDECLARED_OUTPUT )
@@ -2949,7 +2949,7 @@ void D3DToGL::WriteGLSLOutputVariableAssignments()
 					V_snprintf( buf, sizeof( buf ), "varying vec4 oT%d;\n", dwUsageIndex );
 				}
 				StrcatToHeaderCode( buf );
-									
+
 				PrintToBufWithIndents( *m_pBufALUCode, "oT%d = oTempT%d;\n", dwUsageIndex, i );
 			}
 		}
@@ -2960,12 +2960,12 @@ void D3DToGL::WriteGLSLInputVariableAssignments()
 {
 	if ( m_bVertexShader )
 		return;
-		
+
 	for ( int i=0; i < ARRAYSIZE( m_DeclaredInputs ); i++ )
 	{
 		if ( m_DeclaredInputs[i] == UNDECLARED_INPUT )
 			continue;
-				
+
 		uint32 dwToken = m_DeclaredInputs[i];
 
 		uint32 dwUsage = ( dwToken & D3DSP_DCL_USAGE_MASK );
@@ -3094,7 +3094,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	m_bDoFixupZ = (options & D3DToGL_OptionDoFixupZ) != 0;
 	m_bDoFixupY = (options & D3DToGL_OptionDoFixupY) != 0;
 	m_bDoUserClipPlanes = (options & D3DToGL_OptionDoUserClipPlanes) != 0;
-	
+
 	m_bAddHexCodeComments = (options & D3DToGL_AddHexComments) != 0;
 	m_bPutHexCodesAfterLines = (options & D3DToGL_PutHexCommentsAfterLines) != 0;
 	m_bGeneratingDebugText = (options & D3DToGL_GeneratingDebugText) != 0;
@@ -3105,7 +3105,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 
 	// debugging
 	m_bSpew = (options & D3DToGL_OptionSpew) != 0;
-	
+
 	// These are not accessed below in a way that will cause them to glow, so
 	// we could overflow these and/or the buffer pointed to by pDisassembledCode
 	m_pBufAttribCode = new CUtlBuffer( 100, 10000, CUtlBuffer::TEXT_BUFFER );
@@ -3158,7 +3158,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	m_nHighestBoneRegister = -1;
 	m_bGenerateBoneUniformBuffer = false;
 	m_bUseBindlessTexturing = ((options & D3DToGL_OptionUseBindlessTexturing) != 0);
-		
+
 	m_bUsedAtomicTempVar = false;
 	for ( int i=0; i < ARRAYSIZE( m_dwSamplerTypes ); i++ )
 	{
@@ -3176,7 +3176,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	}
 
 	memset( m_dwAttribMap, 0xFF, sizeof(m_dwAttribMap) );
-	
+
 	m_pdwBaseToken = m_pdwNextToken = code;	 // Initialize dwToken pointers
 
 	dwToken = GetNextToken();
@@ -3199,29 +3199,29 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 		m_bGenerateSRGBWriteSuffix = false;
 
 		V_snprintf( (char *)m_pBufHeaderCode->Base(), m_pBufHeaderCode->Size(), "#version %s\n%s//ATTRIBMAP-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx-xx\n", glslVersionText, glslExtText );
-		
+
 		// find that first '-xx' which is where the attrib map will be written later.
 		pAttribMapStart = strstr( (char *)m_pBufHeaderCode->Base(), "-xx" ) + 1;
-		
+
 		m_bVertexShader = true;
 	}
-	
+
 	*bVertexShader = m_bVertexShader;
-	
+
 	m_bGenerateBoneUniformBuffer = m_bVertexShader && ((options & D3DToGL_OptionGenerateBoneUniformBuffer) != 0);
-			
+
 	if ( m_bAddHexCodeComments )
 	{
 		RecordInputAndOutputPositions();
 	}
-	
+
 	if ( m_bSpew )
 	{
 		printf("\n************* translating shader " );
 	}
-	
+
 	int opcounter = 0;
-	
+
 	// Loop until we hit the end dwToken...note that D3DPS_END() == D3DVS_END() so this works for either
 	while ( dwToken != D3DPS_END() )
 	{
@@ -3230,12 +3230,12 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			AddTokenHexCode();
 			RecordInputAndOutputPositions();
 		}
-		
+
 #ifdef POSIX
 		int tokenIndex = m_pdwNextToken - code;
 #endif
 		int aluCodeLength0 = V_strlen( (char *) m_pBufALUCode->Base() );
-		
+
 		dwToken = GetNextToken();	// Get next dwToken in the stream
 		nInstruction = Opcode( dwToken ); // Mask out the instruction opcode
 
@@ -3246,7 +3246,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 #endif
 			opcounter++;
 		}
-		
+
 		switch ( nInstruction )
 		{
 			// -- No arguments at all -----------------------------------------------
@@ -3325,7 +3325,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 				PrintToBufWithIndents( *m_pBufALUCode, "if ( %s %s %s )\n", szLeftSide, s_szCompareStrings[dwCompareMode], szRightSide );
 				StrcatToALUCode( "{\n" );
 				m_NumIndentTabs++;
-				
+
 				break;
 			}
 			case D3DSIO_IF:
@@ -3335,7 +3335,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 				PrintToBufWithIndents( *m_pBufALUCode, "if ( %s )\n", buff );
 				StrcatToALUCode( "{\n" );
 				m_NumIndentTabs++;
-				
+
 				break;
 
 			case D3DSIO_ELSE:
@@ -3344,13 +3344,13 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 				StrcatToALUCode( "else\n" );
 				StrcatToALUCode( "{\n" );
 				m_NumIndentTabs++;
-				
+
 				break;
 
 			case D3DSIO_ENDIF:
 				m_NumIndentTabs--;
 				StrcatToALUCode( "}\n" );
-				
+
 				break;
 
 			case D3DSIO_REP:
@@ -3368,14 +3368,14 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 				Assert( m_nLoopDepth <= 1 );
 
 				m_NumIndentTabs++;
-				
+
 				break;
 
 			case D3DSIO_ENDREP:
 				m_nLoopDepth--;
 				m_NumIndentTabs--;
 				StrcatToALUCode( "}\n" );
-				
+
 				break;
 
 			case D3DSIO_NRM:
@@ -3385,9 +3385,9 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			case D3DSIO_MOVA:
 
 				Handle_UnaryOp( nInstruction );
-				
+
 				break;
-				
+
 			// Unary operations
 			case D3DSIO_MOV:
 			case D3DSIO_RCP:
@@ -3432,7 +3432,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			case D3DSIO_CRS:
 			case D3DSIO_POW:
 				HandleBinaryOp_GLSL( nInstruction );
-				
+
 				break;
 
 			// -- Ternary ops -------------------------------------------------
@@ -3463,7 +3463,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			case D3DSIO_TEXLDD:
 				Handle_TexLDD( nInstruction );
 				break;
-				
+
 			// -- Special cases: texcoord vs texcrd	and	tex vs texld -----------
 			case D3DSIO_TEXCOORD:
 				Handle_TexCoord();
@@ -3476,7 +3476,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			case D3DSIO_TEXLDL:
 				Handle_TEX( nInstruction, true );
 				break;
-				
+
 			case D3DSIO_DCL:
 				Handle_DCL();
 				break;
@@ -3499,7 +3499,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			case D3DSIO_END:
 				break;
 		}
-		
+
 		if ( m_bSpew )
 		{
 			int aluCodeLength1 = V_strlen( (char *) m_pBufALUCode->Base() );
@@ -3507,7 +3507,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			{
 				// code was emitted
 				printf( "\n    > %s", ((char *)m_pBufALUCode->Base()) + aluCodeLength0 );
-				
+
 				aluCodeLength0 = aluCodeLength1;
 			}
 		}
@@ -3522,7 +3522,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 		PrintIndentation( (char*)m_pBufParamCode->Base(), m_pBufParamCode->Size() );
 		StrcatToParamCode( "vec4 scA = vec4( -1.55009923e-6, -2.17013894e-5, 0.00260416674, 0.00026041668 );\n" );
 		PrintIndentation( (char*)m_pBufParamCode->Base(), m_pBufParamCode->Size() );
-		StrcatToParamCode( "vec4 scB = vec4( -0.020833334, -0.125, 1.0, 0.5 );\n" );			
+		StrcatToParamCode( "vec4 scB = vec4( -0.020833334, -0.125, 1.0, 0.5 );\n" );
 	}
 
 	// Stick in the sampler mask in hex
@@ -3534,7 +3534,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 		Assert( m_dwSamplerTypes[i] < 4);
 		nSamplerTypes |= ( m_dwSamplerTypes[i] << ( i * 2 ) );
 	}
-	
+
 	PrintToBuf( *m_pBufHeaderCode, "%sSAMPLERTYPES-%x\n", "//", nSamplerTypes );
 
 	// fragData outputs referenced
@@ -3565,7 +3565,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	{
 		PrintToBuf( *m_pBufHeaderCode, "\nuniform vec4 vcscreen;\n" );
 	}
-				
+
 	for( int i=0; i<32; i++ )
 	{
 		if ( ( m_dwConstIntUsageMask & ( 0x00000001 << i ) ) &&
@@ -3609,7 +3609,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	{
 		PrintToBuf( *m_pBufHeaderCode, "vec4 dst(vec4 src0,vec4 src1) { return vec4(1.0f,src0.y*src1.y,src0.z,src1.w); }\n" );
 	}
-	
+
 	if ( m_bDeclareAddressReg )
 	{
 		if ( !m_bGenerateBoneUniformBuffer )
@@ -3623,7 +3623,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 
 	char *pTempVarStr = "TEMP";
 	pTempVarStr = "vec4";
-	
+
 	// Declare temps in Param code buffer
 	for( int i=0; i<32; i++ )
 	{
@@ -3677,14 +3677,14 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	{
 		PrintToBuf( *m_pBufParamCode, "%s NRM_TEMP;\n", pTempVarStr );
 	}
-		
+
 	if ( m_bDeclareVSOPos && m_bVertexShader )
 	{
 		if ( m_bDoUserClipPlanes )
 		{
 			StrcatToALUCode( "gl_ClipVertex = vTempPos;\n" ); // if user clip is enabled, jam clip space position into gl_ClipVertex
 		}
-		
+
 		if ( m_bDoFixupZ  || m_bDoFixupY )
 		{
 			// TODO: insert clip distance computation something like this:
@@ -3718,7 +3718,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 			//
 		}
 	}
-		
+
 	if ( m_bVertexShader )
 	{
 		if ( m_dwMajorVersion == 3 )
@@ -3748,17 +3748,17 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 						}
 					}
 				}
-			}			
+			}
 		}
 	}
-	else 
+	else
 	{
 		if ( m_dwMajorVersion == 3 )
 		{
 			WriteGLSLInputVariableAssignments();
 		}
 	}
-		
+
 	// do some annotation at the end of the attrib block
 	{
 		char temp[1000];
@@ -3777,8 +3777,8 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 		}
 
 		PrintIndentation( (char*)m_pBufAttribCode->Base(), m_pBufAttribCode->Size() );
-				
-		// This used to write out a translation counter into the shader as a comment. However, the order that shaders get in here 
+
+		// This used to write out a translation counter into the shader as a comment. However, the order that shaders get in here
 		// is non-deterministic between runs, and the change in this comment would cause shaders to appear different to the GL disk cache,
 		// significantly increasing app load time.
 		// Other code looks for trans#%d, so we can't just remove it. Instead, output it as 0.
@@ -3797,7 +3797,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	{
 		PrintToBufWithIndents( *m_pBufHeaderCode, "vec4 %s;\n\n", g_pAtomicTempVarName );
 	}
-	
+
 	// sRGB Write suffix
 	if ( m_bGenerateSRGBWriteSuffix )
 	{
@@ -3809,7 +3809,7 @@ int D3DToGL::TranslateShader( uint32* code, CUtlBuffer *pBufDisassembledCode, bo
 	}
 
 	strcat_s( (char*)m_pBufALUCode->Base(), m_pBufALUCode->Size(), "}\n" );
-	
+
 	// Put all of the strings together for final program ( pHeaderCode + pAttribCode + pParamCode + pALUCode )
 	StrcatToHeaderCode( (char*)m_pBufAttribCode->Base() );
 	StrcatToHeaderCode( (char*)m_pBufParamCode->Base() );

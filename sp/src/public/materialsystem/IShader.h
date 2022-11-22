@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -114,7 +114,7 @@ enum
 	//
 
 	// 219		ClipPlane0				|------ OpenGL will jam clip planes into these two
-	// 220		ClipPlane1				|	
+	// 220		ClipPlane1				|
 
 	VERTEX_SHADER_FLEX_WEIGHTS = 1024,
 	VERTEX_SHADER_MAX_FLEX_WEIGHT_COUNT = 512,
