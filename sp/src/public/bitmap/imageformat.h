@@ -137,6 +137,9 @@ typedef enum _D3DFORMAT
 		D3DFMT_VERTEXDATA,
 		D3DFMT_INDEX32,
 
+		D3DFMT_A2B10G10R10,
+		D3DFMT_A2R10G10B10,
+
 		// adding fake D3D format names for the vendor specific ones (eases debugging/logging)
 		
 		// NV shadow depth tex

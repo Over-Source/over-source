@@ -301,27 +301,20 @@ void	CGLMProgram::SetProgramText( char *text )
 	}
 }
 
-bool	CGLMProgram::CompileActiveSources	( void )
+void	CGLMProgram::CompileActiveSources	( void )
 {
-	bool result = true;	// assume success
-
 	// compile everything we have text for
 	for( int i=0; i<kGLMNumProgramTypes; i++)
 	{
 		if (m_descs[i].m_textPresent)
 		{
-			if (!Compile( (EGLMProgramLang)i ))
-			{
-				result = false;
-			}
+			Compile( (EGLMProgramLang)i );
 		}
 	}
-	return result;
 }
 
-bool	CGLMProgram::Compile( EGLMProgramLang lang )
+void	CGLMProgram::Compile( EGLMProgramLang lang )
 {
-	bool result = true;	// indicating validity..
 	bool noisy = false; noisy;
 	int loglevel = gl_shaderpair_cachelog.GetInt();
 
@@ -371,8 +364,6 @@ bool	CGLMProgram::Compile( EGLMProgramLang lang )
 
 			CheckValidity( lang );
 			// leave it bound n enabled, don't care (draw will sort it all out)
-
-			result = arbDesc->m_valid;
 		}
 		break;
 
@@ -442,12 +433,9 @@ bool	CGLMProgram::Compile( EGLMProgramLang lang )
 				GetComboIndexNameString( tempname, sizeof(tempname) );
 				printf("\ncompile: %s on GL name %d ", tempname, glslDesc->m_object.glsl );
 			}
-
-			result = glslDesc->m_valid;
 		}
 		break;
 	}
-	return result;
 }
 
 #if GLMDEBUG

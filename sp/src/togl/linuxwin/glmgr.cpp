@@ -483,7 +483,7 @@ GLMContext *GLMgr::GetCurrentContext( void )
 // GLMContext public methods
 void GLMContext::MakeCurrent( bool bRenderThread )
 {
-	TM_ZONE( TELEMETRY_LEVEL0, 0, "GLMContext::MakeCurrent" );
+	tmZone( TELEMETRY_LEVEL0, 0, "GLMContext::MakeCurrent" );
 	Assert( m_nCurOwnerThreadId == 0 || m_nCurOwnerThreadId == ThreadGetCurrentId() );
 
 #if defined( USE_SDL )
@@ -528,7 +528,7 @@ void GLMContext::MakeCurrent( bool bRenderThread )
 
 void GLMContext::ReleaseCurrent( bool bRenderThread )
 {
-	TM_ZONE( TELEMETRY_LEVEL0, 0, "GLMContext::ReleaseCurrent" );
+	tmZone( TELEMETRY_LEVEL0, 0, "GLMContext::ReleaseCurrent" );
 	Assert( m_nCurOwnerThreadId == ThreadGetCurrentId() );
 
 #if defined( USE_SDL )
@@ -1822,15 +1822,7 @@ CGLMProgram	*GLMContext::NewProgram( EGLMProgramType type, char *progString, con
 
 	prog->SetProgramText( progString );
 	prog->SetShaderName( pShaderName );
-	bool compile_ok = prog->CompileActiveSources();
-	(void)compile_ok;
-	if ( !compile_ok )
-	{
-		GLMDebugPrintf( "Compile of \"%s\" Failed:\n", pShaderName );
-		Plat_DebugString( progString );
-	}
-
-	AssertOnce( compile_ok );
+	prog->CompileActiveSources();
 
 	return prog;
 }
