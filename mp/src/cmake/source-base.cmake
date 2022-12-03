@@ -1,0 +1,42 @@
+# Source base with CMake
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 11)
+
+if(DEFINED POSIX)
+	if(NOT BUILD_64BIT)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32" CACHE STRING "c++ flags" FORCE)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32" CACHE STRING "c flags" FORCE)
+		set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} -m32")
+	endif()
+	
+	if (CMAKE_BUILD_TYPE EQUAL "Debug")	
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Og")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Og")
+	elseif(CMAKE_BUILD_TYPE EQUAL "Release")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O3")
+	endif()
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -march=i686 -msse3")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -march=i686 -msse3")
+endif()
+
+if(DEFINED POSIX)
+	# NO undefined in shared libs
+	set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--no-undefined ${CMAKE_SHARED_LINKER_FLAGS}")
+	
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -Wno-invalid-offsetof -Wno-enum-compare -Wno-format-security -Wno-multichar -Wno-ignored-attributes -Wno-conversion-null -Wno-write-strings")
+	if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.0)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-narrowing -fabi-compat-version=2")
+	endif()
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-narrowing -Wno-enum-compare -Wno-format-security -Wno-multichar")
+	if(DEFINED POSIX64)
+		set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} -l:ld-linux-x86_64.so.2")
+		set(CMAKE_LIBRARY_PATH "/usr/lib/x86_64-linux-gnu/")
+		include_directories("/usr/include/x86_64-linux-gnu")
+	else()
+		set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} -l:ld-linux.so.2")
+		set(CMAKE_LIBRARY_PATH "/usr/lib/i386-linux-gnu/ /usr/lib32")
+		include_directories("/usr/include/i386-linux-gnu")
+	endif()
+endif()
