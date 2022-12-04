@@ -1,6 +1,6 @@
 # Root CMake script - adapted from work on other projects.
 cmake_minimum_required(VERSION 3.5)
-project(Source-2013)
+project(Over-Source)
 
 #set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
