@@ -1,10 +1,10 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================
 
-#include "fgdlib/WCKeyValues.h"
+#include "fgdlib/wckeyvalues.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -139,8 +139,8 @@ WCKeyValuesT<Base>::~WCKeyValuesT(void)
 template<class Base>
 const char *WCKeyValuesT<Base>::GetValue(const char *pszKey, int *piIndex) const
 {
-	int i = FindByKeyName( pszKey );
-	if ( i == GetInvalidIndex() )
+	int i = WCKeyValuesT<Base>::FindByKeyName( pszKey );
+	if ( i == WCKeyValuesT<Base>::GetInvalidIndex() )
 	{
 		return NULL;
 	}
@@ -148,8 +148,8 @@ const char *WCKeyValuesT<Base>::GetValue(const char *pszKey, int *piIndex) const
 	{
 		if(piIndex)
 			piIndex[0] = i;
-			
-		return m_KeyValues[i].szValue;
+
+		return WCKeyValuesT<Base>::m_KeyValues[i].szValue;
 	}
 }
 
@@ -169,7 +169,7 @@ template<class Base>
 void WCKeyValuesT<Base>::SetValue(const char *pszKey, int iValue)
 {
 	char szValue[100];
-	itoa(iValue, szValue, 10);
+	snprintf(szValue, 100, "%i", iValue);
 
 	SetValue(pszKey, szValue);
 }
@@ -177,7 +177,7 @@ void WCKeyValuesT<Base>::SetValue(const char *pszKey, int iValue)
 
 //-----------------------------------------------------------------------------
 // Purpose: Strips leading and trailing whitespace from the string.
-// Input  : psz - 
+// Input  : psz -
 //-----------------------------------------------------------------------------
 void StripEdgeWhiteSpace(char *psz)
 {
@@ -192,7 +192,7 @@ void StripEdgeWhiteSpace(char *psz)
 	}
 
 	int iLen = strlen(psz) - 1;
-	
+
 	if ( iLen >= 0 )
 	{
 		while (V_isspace(psz[iLen]))
@@ -209,9 +209,9 @@ void StripEdgeWhiteSpace(char *psz)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : pszKey - 
-//			pszValue - 
+// Purpose:
+// Input  : pszKey -
+//			pszValue -
 //-----------------------------------------------------------------------------
 template<class Base>
 void WCKeyValuesT<Base>::SetValue(const char *pszKey, const char *pszValue)
@@ -233,8 +233,8 @@ void WCKeyValuesT<Base>::SetValue(const char *pszKey, const char *pszValue)
 	StripEdgeWhiteSpace(szTmpKey);
 	StripEdgeWhiteSpace(szTmpValue);
 
-	int i = FindByKeyName( szTmpKey );
-	if ( i == GetInvalidIndex() )
+	int i = WCKeyValuesT<Base>::FindByKeyName( szTmpKey );
+	if ( i == WCKeyValuesT<Base>::GetInvalidIndex() )
 	{
 		if ( pszValue )
 		{
@@ -244,39 +244,36 @@ void WCKeyValuesT<Base>::SetValue(const char *pszKey, const char *pszValue)
 			MDkeyvalue newkv;
 			Q_strncpy( newkv.szKey, szTmpKey, sizeof( newkv.szKey ) );
 			Q_strncpy( newkv.szValue, szTmpValue, sizeof( newkv.szValue ) );
-			InsertKeyValue( newkv );
+			WCKeyValuesT<Base>::InsertKeyValue( newkv );
 		}
 	}
 	else
 	{
 		if (pszValue != NULL)
 		{
-			V_strncpy(m_KeyValues[i].szValue, szTmpValue, sizeof(m_KeyValues[i].szValue));
+			V_strncpy(WCKeyValuesT<Base>::m_KeyValues[i].szValue, szTmpValue, sizeof(WCKeyValuesT<Base>::m_KeyValues[i].szValue));
 		}
 		//
 		// If we are setting to a NULL value, delete the key.
 		//
 		else
 		{
-			RemoveKeyAt( i );
+			WCKeyValuesT<Base>::RemoveKeyAt( i );
 		}
 	}
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 template<class Base>
 void WCKeyValuesT<Base>::RemoveAll(void)
 {
-	m_KeyValues.RemoveAll();
+	WCKeyValuesT<Base>::m_KeyValues.RemoveAll();
 }
 
 
 // Explicit instantiations.
 template class WCKeyValuesT<WCKVBase_Dict>;
 template class WCKeyValuesT<WCKVBase_Vector>;
-
-
-

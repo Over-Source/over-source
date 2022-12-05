@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -9,20 +9,22 @@
 #pragma once
 
 
+#pragma warning(push, 1)
+#pragma warning(disable:4701 4702 4530)
+#undef min
+#undef max
+#include <fstream>
+#pragma warning(pop)
 #include <tier0/dbg.h>
 #include <utlvector.h>
 #include <utldict.h>
-#pragma warning(push, 1)
-#pragma warning(disable:4701 4702 4530)
-#include <fstream>
-#pragma warning(pop)
 
 
 #define KEYVALUE_MAX_KEY_LENGTH			80
 #define KEYVALUE_MAX_VALUE_LENGTH		512
 
 
-class MDkeyvalue 
+class MDkeyvalue
 {
 	public:
 
@@ -34,7 +36,7 @@ class MDkeyvalue
 		~MDkeyvalue(void);
 
 		MDkeyvalue &operator =(const MDkeyvalue &other);
-		
+
 		inline void Set(const char *pszKey, const char *pszValue);
 		inline const char *Key(void) const;
 		inline const char *Value(void) const;
@@ -110,7 +112,7 @@ typedef CUtlVector<MDkeyvalue> KeyValueArray;
 class WCKVBase_Vector
 {
 public:
-	
+
 	// Iteration helpers.
 	inline int GetCount() const			{ return m_KeyValues.Count(); }
 	inline int GetFirst() const			{ return m_KeyValues.Count() - 1; }
@@ -182,48 +184,48 @@ typedef WCKeyValuesT<WCKVBase_Vector> WCKeyValuesVector;
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : nIndex - 
+// Purpose:
+// Input  : nIndex -
 //-----------------------------------------------------------------------------
 template<class Base>
 inline const char *WCKeyValuesT<Base>::GetKey(int nIndex) const
 {
-	return(m_KeyValues.Element(nIndex).szKey);
+	return WCKeyValuesT<Base>::m_KeyValues.Element(nIndex).szKey;
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : nIndex - 
+// Purpose:
+// Input  : nIndex -
 // Output : MDKeyValue
 //-----------------------------------------------------------------------------
 template<class Base>
 inline MDkeyvalue &WCKeyValuesT<Base>::GetKeyValue(int nIndex)
 {
-	return(m_KeyValues.Element(nIndex));
+	return WCKeyValuesT<Base>::m_KeyValues.Element(nIndex);
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : nIndex - 
+// Purpose:
+// Input  : nIndex -
 // Output : MDkeyvalue
 //-----------------------------------------------------------------------------
 template<class Base>
 inline const MDkeyvalue& WCKeyValuesT<Base>::GetKeyValue(int nIndex) const
 {
-	return(m_KeyValues.Element(nIndex));
+	return WCKeyValuesT<Base>::m_KeyValues.Element(nIndex);
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : nIndex - 
+// Purpose:
+// Input  : nIndex -
 //-----------------------------------------------------------------------------
 template<class Base>
 inline const char *WCKeyValuesT<Base>::GetValue(int nIndex) const
 {
-	return(m_KeyValues.Element(nIndex).szValue);
+	return WCKeyValuesT<Base>::m_KeyValues.Element(nIndex).szValue;
 }
 
 

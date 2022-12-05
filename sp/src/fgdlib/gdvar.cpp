@@ -3,8 +3,8 @@
 //=============================================================================
 
 #include "fgdlib/fgdlib.h"
-#include "fgdlib/GameData.h"
-#include "fgdlib/WCKeyValues.h"
+#include "fgdlib/gamedata.h"
+#include "fgdlib/wckeyvalues.h"
 #include "fgdlib/gdvar.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
@@ -132,7 +132,7 @@ GDinputvariable &GDinputvariable::operator =(GDinputvariable &Other)
 	m_bReadOnly = Other.m_bReadOnly;
 
 	m_Items.RemoveAll();
-	
+
 	int nCount = Other.m_Items.Count();
 	for (int i = 0; i < nCount; i++)
 	{
@@ -202,8 +202,8 @@ const char *GDinputvariable::GetTypeText(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : tr - 
+// Purpose:
+// Input  : tr -
 // Output : Returns TRUE on success, FALSE on failure.
 //-----------------------------------------------------------------------------
 BOOL GDinputvariable::InitFromTokens(TokenReader& tr)
@@ -474,7 +474,7 @@ BOOL GDinputvariable::InitFromTokens(TokenReader& tr)
 			// add item to array of items
 			m_Items.AddToTail(ivi);
 		}
-		
+
 		// Set the default value.
 		unsigned long nDefault = 0;
 		for (int i = 0; i < m_Items.Count(); i++)
@@ -669,7 +669,7 @@ void GDinputvariable::ToKeyValue(MDkeyvalue *pkv)
 	}
 	else if (eStoreAs == INTEGER)
 	{
-		itoa(m_nValue, pkv->szValue, 10);
+		snprintf(pkv->szValue, 512, "%i", m_nValue);
 	}
 }
 
@@ -725,5 +725,3 @@ const char *GDinputvariable::GetVarTypeName( GDIV_TYPE eType )
 {
 	return TypeMap[ eType ].pszName;
 }
-
-

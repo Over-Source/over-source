@@ -1,12 +1,12 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================
 
 
 #include <tier0/dbg.h>
-#include "fgdlib/InputOutput.h"
+#include "fgdlib/inputoutput.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/memdbgon.h>
@@ -40,7 +40,7 @@ static TypeMap_t TypeMap[] =
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 CClassInputOutputBase::CClassInputOutputBase(void)
 {
@@ -50,9 +50,9 @@ CClassInputOutputBase::CClassInputOutputBase(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : pszName - 
-//			eType - 
+// Purpose:
+// Input  : pszName -
+//			eType -
 //-----------------------------------------------------------------------------
 CClassInputOutputBase::CClassInputOutputBase(const char *pszName, InputOutputType_t eType)
 {
@@ -88,8 +88,8 @@ const char *CClassInputOutputBase::GetTypeText(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : szType - 
+// Purpose:
+// Input  : szType -
 // Output : InputOutputType_t
 //-----------------------------------------------------------------------------
 InputOutputType_t CClassInputOutputBase::SetType(const char *szType)
@@ -134,7 +134,7 @@ CClassInputOutputBase &CClassInputOutputBase::operator =(CClassInputOutputBase &
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 CClassInput::CClassInput(void)
 {
@@ -142,9 +142,9 @@ CClassInput::CClassInput(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : pszName - 
-//			eType - 
+// Purpose:
+// Input  : pszName -
+//			eType -
 //-----------------------------------------------------------------------------
 CClassInput::CClassInput(const char *pszName, InputOutputType_t eType)
 	: CClassInputOutputBase(pszName, eType)
@@ -153,7 +153,7 @@ CClassInput::CClassInput(const char *pszName, InputOutputType_t eType)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 CClassOutput::CClassOutput(void)
 {
@@ -161,9 +161,9 @@ CClassOutput::CClassOutput(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
-// Input  : pszName - 
-//			eType - 
+// Purpose:
+// Input  : pszName -
+//			eType -
 //-----------------------------------------------------------------------------
 CClassOutput::CClassOutput(const char *pszName, InputOutputType_t eType)
 	: CClassInputOutputBase(pszName, eType)

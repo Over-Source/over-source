@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -12,12 +12,15 @@
 
 #pragma warning(push, 1)
 #pragma warning(disable:4701 4702 4530)
+#undef min
+#undef max
 #include <fstream>
 #pragma warning(pop)
-#include "TokenReader.h"
-#include "GDClass.h"
-#include "InputOutput.h"
-#include "UtlString.h"
+
+#include "tokenreader.h"
+#include "gdclass.h"
+#include "inputoutput.h"
+#include "utlstring.h"
 #include "utlvector.h"
 
 
@@ -25,7 +28,7 @@ class MDkeyvalue;
 class GameData;
 class KeyValues;
 
-enum TEXTUREFORMAT;
+// enum TEXTUREFORMAT;
 
 
 typedef void (*GameDataMessageFunc_t)(int level, PRINTF_FORMAT_STRING const char *fmt, ...);
@@ -88,7 +91,7 @@ class GameData
 		bool	RemapNameField( const char *pszInValue, char *pszOutValue, TNameFixup NameFixup );
 		bool	LoadFGDMaterialExclusions( TokenReader &tr );
 		bool	LoadFGDAutoVisGroups( TokenReader &tr );
-		
+
 
 		CUtlVector< FGDMatExlcusions_s >	m_FGDMaterialExclusions;
 
@@ -126,13 +129,13 @@ inline GDclass *GameData::GetClass(int nIndex)
 {
 	if (nIndex >= m_Classes.Count())
 		return NULL;
-		
+
 	return m_Classes.Element(nIndex);
 }
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int GameData::GetMinMapCoord(void)
 {
@@ -141,7 +144,7 @@ int GameData::GetMinMapCoord(void)
 
 
 //-----------------------------------------------------------------------------
-// Purpose: 
+// Purpose:
 //-----------------------------------------------------------------------------
 int GameData::GetMaxMapCoord(void)
 {

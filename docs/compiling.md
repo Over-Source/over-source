@@ -39,7 +39,7 @@ cd build
 make -f Makefile
 ```
 
-On Linux, its possible to use all available CPU cores with a argument.
+On Linux, its possible to use all available CPU cores with an argument.
 
 ```sh
 make -f Makefile -j$(nproc)
