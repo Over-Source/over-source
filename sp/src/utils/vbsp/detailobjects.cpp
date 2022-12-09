@@ -6,26 +6,29 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#ifdef _WIN32
 #include <windows.h>
+#include <io.h>
+#endif
+
 #include "vbsp.h"
 #include "bsplib.h"
 #include "KeyValues.h"
 #include "utlsymbol.h"
 #include "utlvector.h"
-#include <io.h>
 #include "bspfile.h"
 #include "utilmatlib.h"
 #include "gamebspfile.h"
-#include "mathlib/VMatrix.h"
+#include "mathlib/vmatrix.h"
 #include "materialpatch.h"
 #include "pacifier.h"
 #include "vstdlib/random.h"
 #include "builddisp.h"
 #include "disp_vbsp.h"
-#include "UtlBuffer.h"
-#include "CollisionUtils.h"
+#include "utlbuffer.h"
+#include "collisionutils.h"
 #include <float.h>
-#include "UtlLinkedList.h"
+#include "utllinkedlist.h"
 #include "byteswap.h"
 #include "writebsp.h"
 
@@ -107,7 +110,7 @@ static void ParseDetailGroup( int detailId, KeyValues* pGroupKeyValues )
 {
 	// Sort the group by alpha
 	float alpha = pGroupKeyValues->GetFloat( "alpha", 1.0f );
-	
+
 	int i = s_DetailObjectDict[detailId].m_Groups.Count();
 	while ( --i >= 0 )
 	{
@@ -156,7 +159,7 @@ static void ParseDetailGroup( int detailId, KeyValues* pGroupKeyValues )
 						}
 						else
 							model.m_Type = DETAIL_PROP_TYPE_SPRITE;
-					}					
+					}
 					else
 					{
 						// card sprite
@@ -167,7 +170,7 @@ static void ParseDetailGroup( int detailId, KeyValues* pGroupKeyValues )
 					model.m_Tex[1].Init();
 
 					float x = 0, y = 0, flWidth = 64, flHeight = 64, flTextureSize = 512;
-					int nValid = sscanf( pSpriteData, "%f %f %f %f %f", &x, &y, &flWidth, &flHeight, &flTextureSize ); 
+					int nValid = sscanf( pSpriteData, "%f %f %f %f %f", &x, &y, &flWidth, &flHeight, &flTextureSize );
 					if ( (nValid != 5) || (flTextureSize == 0) )
 					{
 						Error( "Invalid arguments to \"sprite\" in detail.vbsp (model %s)!\n", model.m_ModelName.String() );
@@ -289,7 +292,7 @@ static const char *FindDetailVBSPName( void )
 		if ( !strcmp( pEntity, "worldspawn" ) )
 		{
 			const char *pDetailVBSP = ValueForKey( &entities[i], "detailvbsp" );
-			if ( !pDetailVBSP || !pDetailVBSP[0] ) 
+			if ( !pDetailVBSP || !pDetailVBSP[0] )
 			{
 				pDetailVBSP = "detail.vbsp";
 			}
@@ -475,7 +478,7 @@ static void AddDetailToLump( const char* pModelName, const Vector& pt, const QAn
 	int i = s_DetailObjectLump.AddToTail( );
 
 	DetailObjectLump_t& objectLump = s_DetailObjectLump[i];
-	objectLump.m_DetailModel = AddDetailDictLump( pModelName ); 
+	objectLump.m_DetailModel = AddDetailDictLump( pModelName );
 	VectorCopy( angles, objectLump.m_Angles );
 	VectorCopy( pt, objectLump.m_Origin );
 	objectLump.m_Leaf = ComputeDetailLeaf(pt);
@@ -506,7 +509,7 @@ static void AddDetailSpriteToLump( const Vector &vecOrigin, const QAngle &vecAng
 	}
 
 	DetailObjectLump_t& objectLump = s_DetailObjectLump[i];
-	objectLump.m_DetailModel = AddDetailSpriteDictLump( pPos, pTex ); 
+	objectLump.m_DetailModel = AddDetailSpriteDictLump( pPos, pTex );
 	VectorCopy( vecAngles, objectLump.m_Angles );
 	VectorCopy( vecOrigin, objectLump.m_Origin );
 	objectLump.m_Leaf = ComputeDetailLeaf(vecOrigin);
@@ -557,7 +560,7 @@ static void PlaceDetail( DetailModel_t const& model, const Vector& pt, const Vec
 	// If it's between min + max, flip a coin...
 	if (cosAngle < model.m_MinCosAngle)
 	{
-		float probability = (cosAngle - model.m_MaxCosAngle) / 
+		float probability = (cosAngle - model.m_MaxCosAngle) /
 			(model.m_MinCosAngle - model.m_MaxCosAngle);
 
 		float t = rand() / (float)VALVE_RAND_MAX;
@@ -615,7 +618,7 @@ static void PlaceDetail( DetailModel_t const& model, const Vector& pt, const Vec
 	default:
 		{
 			float flScale = 1.0f;
-			if ( model.m_flRandomScaleStdDev != 0.0f ) 
+			if ( model.m_flRandomScaleStdDev != 0.0f )
 			{
 				flScale = fabs( RandomGaussianFloat( 1.0f, model.m_flRandomScaleStdDev ) );
 			}
@@ -734,7 +737,7 @@ static float ComputeDisplacementFaceArea( dface_t* pFace )
 //-----------------------------------------------------------------------------
 // Places Detail Objects on a face
 //-----------------------------------------------------------------------------
-static void EmitDetailObjectsOnDisplacementFace( dface_t* pFace, 
+static void EmitDetailObjectsOnDisplacementFace( dface_t* pFace,
 						DetailObject_t& detail, CCoreDispInfo& coreDispInfo )
 {
 	assert(pFace->numedges == 4);
@@ -848,8 +851,8 @@ void EmitDetailModels()
 
 		// Try to get at the material
 		bool found;
-		MaterialSystemMaterial_t handle = 
-			FindOriginalMaterial( TexDataStringTable_GetString( pTexData->nameStringTableID ), 
+		MaterialSystemMaterial_t handle =
+			FindOriginalMaterial( TexDataStringTable_GetString( pTexData->nameStringTableID ),
 						  &found, false );
 		if (!found)
 			continue;
@@ -865,7 +868,7 @@ void EmitDetailModels()
 		int objectType = s_DetailObjectDict.Find(search);
 		if (objectType < 0)
 		{
-			Warning("Material %s uses unknown detail object type %s!\n",	
+			Warning("Material %s uses unknown detail object type %s!\n",
 				TexDataStringTable_GetString( pTexData->nameStringTableID ),
 				pDetailType);
 			continue;

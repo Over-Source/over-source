@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -26,6 +26,8 @@
 #include <vector>
 
 #include <assert.h>
+#include <memory.h>
+#include <limits.h>
 #ifdef _DEBUG
 #include <crtdbg.h>
 #endif
@@ -358,7 +360,7 @@ STRIPLIST::iterator FindBestCachedStrip(STRIPLIST *pstriplist,
     {
         STRIPVERTS &stripverts = **istriplistbest;
         STRIPVERTS::iterator vend = stripverts.end();
-        
+
         reverse(stripverts.begin(), --vend);
     }
 
@@ -927,4 +929,3 @@ void ComputeVertexPermutation(int numstripindices, WORD* pstripindices,
     delete[] pSortTable;
     delete[] pInversePermutation;
 }
-

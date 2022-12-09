@@ -11,17 +11,22 @@
 #include "utlvector.h"
 #include "bspfile.h"
 #include "gamebspfile.h"
-#include "VPhysics_Interface.h"
-#include "Studio.h"
+#include "vphysics_interface.h"
 #include "byteswap.h"
-#include "UtlBuffer.h"
-#include "CollisionUtils.h"
+#include "utlbuffer.h"
+#include "collisionutils.h"
 #include <float.h>
-#include "CModel.h"
-#include "PhysDll.h"
+#include "cmodel.h"
+#include "physdll.h"
 #include "utlsymbol.h"
 #include "tier1/strtools.h"
 #include "KeyValues.h"
+
+/* This right here is a terrible fix, but it works. I don't want to nuke compat with Windurs */
+#undef MINMAX_H
+#include <minmax.h>
+
+#include "studio.h"
 
 static void SetCurrentModel( studiohdr_t *pStudioHdr );
 static void FreeCurrentModelVertexes();
@@ -55,7 +60,7 @@ struct StaticPropBuild_t
 	unsigned short	m_nMinDXLevel;
 	unsigned short	m_nMaxDXLevel;
 };
- 
+
 
 //-----------------------------------------------------------------------------
 // Used to cache collision model generation
@@ -245,7 +250,7 @@ static CPhysCollide* GetCollisionModel( char const* pModelName )
 	// Convert to a common string
 	char* pTemp = (char*)_alloca(strlen(pModelName) + 1);
 	strcpy( pTemp, pModelName );
-	_strlwr( pTemp );
+	strlwr( pTemp );
 
 	char* pSlash = strchr( pTemp, '\\' );
 	while( pSlash )
@@ -309,7 +314,7 @@ static CPhysCollide* GetCollisionModel( char const* pModelName )
 // Tests a single leaf against the static prop
 //-----------------------------------------------------------------------------
 
-static bool TestLeafAgainstCollide( int depth, int* pNodeList, 
+static bool TestLeafAgainstCollide( int depth, int* pNodeList,
 	Vector const& origin, QAngle const& angles, CPhysCollide* pCollide )
 {
 	// Copy the planes in the node list into a list of planes
@@ -406,9 +411,9 @@ static void ComputeConvexHullLeaves_R( int node, int depth, int* pNodeList,
 			pNodeList[depth] = node;
 			++depth;
 
-			ComputeConvexHullLeaves_R( pNode->children[1], 
+			ComputeConvexHullLeaves_R( pNode->children[1],
 				depth, pNodeList, mins, maxs, origin, angles, pCollide, leafList );
-			
+
 			pNodeList[depth - 1] = - node - 1;
 			ComputeConvexHullLeaves_R( pNode->children[0],
 				depth, pNodeList, mins, maxs, origin, angles, pCollide, leafList );
@@ -432,7 +437,7 @@ static void ComputeConvexHullLeaves_R( int node, int depth, int* pNodeList,
 // Places Static Props in the level
 //-----------------------------------------------------------------------------
 
-static void ComputeStaticPropLeaves( CPhysCollide* pCollide, Vector const& origin, 
+static void ComputeStaticPropLeaves( CPhysCollide* pCollide, Vector const& origin,
 				QAngle const& angles, CUtlVector<unsigned short>& leafList )
 {
 	// Compute an axis-aligned bounding box for the collide
@@ -490,7 +495,7 @@ static void AddStaticPropToLump( StaticPropBuild_t const& build )
 	// Insert an element into the lump data...
 	int i = s_StaticPropLump.AddToTail( );
 	StaticPropLump_t& propLump = s_StaticPropLump[i];
-	propLump.m_PropType = AddStaticPropDictLump( build.m_pModelName ); 
+	propLump.m_PropType = AddStaticPropDictLump( build.m_pModelName );
 	VectorCopy( build.m_Origin, propLump.m_Origin );
 	VectorCopy( build.m_Angles, propLump.m_Angles );
 	propLump.m_FirstLeaf = s_StaticPropLeafLump.Count();
@@ -507,7 +512,7 @@ static void AddStaticPropToLump( StaticPropBuild_t const& build )
 	propLump.m_flForcedFadeScale = build.m_flForcedFadeScale;
 	propLump.m_nMinDXLevel = build.m_nMinDXLevel;
 	propLump.m_nMaxDXLevel = build.m_nMaxDXLevel;
-	
+
 	if (build.m_pLightingOrigin && *build.m_pLightingOrigin)
 	{
 		if (ComputeLightingOrigin( build, propLump.m_LightingOrigin ))
@@ -631,11 +636,11 @@ void EmitStaticProps()
 			build.m_FadesOut = (build.m_FadeMaxDist > 0);
 			build.m_pLightingOrigin = ValueForKey( &entities[i], "lightingorigin" );
 			if (build.m_FadesOut)
-			{			  
+			{
 				build.m_FadeMinDist = FloatForKey( &entities[i], "fademindist" );
 				if (build.m_FadeMinDist < 0)
 				{
-					build.m_FadeMinDist = build.m_FadeMaxDist; 
+					build.m_FadeMinDist = build.m_FadeMaxDist;
 				}
 			}
 			else
@@ -697,7 +702,7 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void * pModelData )
 
 	// mandatory callback to make requested data resident
 	// load and persist the vertex file
-	strcpy( fileName, "models/" );	
+	strcpy( fileName, "models/" );
 	strcat( fileName, g_pActiveStudioHdr->pszName() );
 	Q_StripExtension( fileName, fileName, sizeof( fileName ) );
 	strcat( fileName, ".vvd" );
@@ -738,4 +743,3 @@ const vertexFileHeader_t * mstudiomodel_t::CacheVertexData( void * pModelData )
 	g_pActiveStudioHdr->pVertexBase = (void*)pVvdHdr;
 	return pVvdHdr;
 }
-

@@ -1,6 +1,6 @@
 # Root CMake script - adapted from work on other projects.
 cmake_minimum_required(VERSION 3.5)
-project(Over-Source)
+project(oversource)
 
 #set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
@@ -148,7 +148,8 @@ add_subdirectory(game/server)
 add_subdirectory(utils/lzma)
 
 add_subdirectory(fgdlib)
-#add_subdirectory(utils/vbsp)
+add_subdirectory(togl)
+add_subdirectory(utils/vbsp)
 #add_subdirectory(utils/vrad)
 #add_subdirectory(utils/vrad_launcher)
 #add_subdirectory(utils/vvis)

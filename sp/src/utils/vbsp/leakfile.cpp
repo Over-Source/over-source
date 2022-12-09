@@ -1,13 +1,13 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
 //=============================================================================//
 
 #include "vbsp.h"
-#include "color.h"
+#include "Color.h"
 
 /*
 ==============================================================================
